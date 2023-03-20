@@ -17,6 +17,19 @@ export default class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    JSON.parse(contacts)
+      ? this.setState({ contacts: JSON.parse(contacts) })
+      : console.log('Nothing in storage');
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.state.contacts !== prevState.contacts
+      ? localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
+      : console.log('Nothing to change');
+  }
+
   addContact = contactInfo => {
     const newContact = {
       ...contactInfo,
@@ -32,12 +45,16 @@ export default class App extends Component {
 
     return checkDoublicate
       ? alert(`${newContact.name} is already in contacts`)
-      : this.setState(prevState => ({ contacts: [...prevState.contacts, newContact] }));
+      : this.setState(prevState => ({
+          contacts: [...prevState.contacts, newContact],
+        }));
   };
 
   searchContact = () => {
     const { filter, contacts } = this.state;
-    return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
   };
 
   filterInputing = e => {
@@ -56,7 +73,10 @@ export default class App extends Component {
         <AppHeader>Phonebook</AppHeader>
         <ContactForm addContact={this.addContact}></ContactForm>
         <AppSubheader>Contacts</AppSubheader>
-        <Filter filter={this.state.filter} filterInputing={this.filterInputing}></Filter>
+        <Filter
+          filter={this.state.filter}
+          filterInputing={this.filterInputing}
+        ></Filter>
         <ContactList
           contacts={this.searchContact()}
           deleteContact={this.deleteContact}
